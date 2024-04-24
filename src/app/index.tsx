@@ -1,22 +1,31 @@
 import { StatusBar } from "expo-status-bar";
-import { FlatList, StyleSheet, Text, View } from "react-native";
-import { Stack } from "expo-router";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Stack, Link } from "expo-router";
 
-const polls = [1, 2, 3];
+const polls = [
+  { id: 1, title: "Volby za lepsie SK" },
+  { id: 2, title: "Volby za lepsie CZ" },
+  { id: 3, title: "Volby za lepsie PL" },
+  { id: 4, title: "Volby za lepsie HU" },
+];
 
 export default function HomeScreen() {
   return (
     <>
-    <Stack.Screen options={{title: 'Polls'}} />
-    <FlatList
-      data={polls}
-      contentContainerStyle={styles.container}
-      renderItem={() => (
-        <View style={styles.pollContainer}>
-          <Text style={styles.pollTitle}>Hlasujem za moznost</Text>
-        </View>
-      )}
-    />
+      <Stack.Screen options={{ title: "Polls" }} />
+      <FlatList
+        data={polls}
+        contentContainerStyle={styles.container}
+        renderItem={({ item }) => (
+          <Link href={`polls/${item.id}`} asChild>
+            <Pressable style={styles.pollContainer}>
+              <Text style={styles.pollTitle}>
+                {item.id}: {item.title}
+              </Text>
+            </Pressable>
+          </Link>
+        )}
+      />
     </>
   );
 }
