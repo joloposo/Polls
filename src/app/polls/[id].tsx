@@ -1,14 +1,25 @@
 import { useLocalSearchParams, Stack } from "expo-router";
-import { View, Text, StyleSheet, Pressable, Button, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Button,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Poll } from "../../types/db";
+import { Poll, Vote } from "../../types/db";
 import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../providers/AuthProvider";
 
 export default function PollDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [poll, setPoll] = useState<Poll>(null);
+  const [userVote, setUserVote] = useState<Vote>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchPolls = async () => {
@@ -21,15 +32,51 @@ export default function PollDetails() {
       if (error) {
         Alert.alert("Error", error.message);
       }
-
       setPoll(data);
     };
 
+    const fetchUserVotes = async () => {
+      let { data, error } = await supabase
+        .from("votes")
+        .select("*")
+        .eq("poll_id", Number.parseInt(id))
+        .eq("user_id", user.id)
+        .limit(1)
+        .single();
+
+      setUserVote(data);
+      if (data) {
+        setSelected(data.option);
+      }
+    };
+
     fetchPolls();
+    fetchUserVotes();
   }, []);
 
-  const vote = () => {
-    console.warn("Vote: ", selected, ", ", poll.options[selected]);
+  const vote = async () => {
+    const newVote = {
+      option: selected,
+      poll_id: poll.id,
+      user_id: user.id,
+    };
+
+    if (userVote) {
+      newVote.id = userVote.id;
+    }
+
+    const { data, error } = await supabase
+      .from("votes")
+      .upsert([newVote])
+      .select()
+      .single();
+
+    if (error) {
+      Alert.alert("Failed to vote");
+    } else {
+      setUserVote(data);
+      Alert.alert("Thank you for voting!");
+    }
   };
 
   if (!poll) {
@@ -43,14 +90,14 @@ export default function PollDetails() {
       <View style={{ gap: 5 }}>
         {poll.options.map((option, index) => (
           <Pressable
-            onPress={() => setSelected(index)}
+            onPress={() => setSelected(option)}
             key={index}
             style={styles.optionContainer}
           >
             <Feather
-              name={index === selected ? "check-circle" : "circle"}
+              name={option === selected ? "check-circle" : "circle"}
               size={18}
-              color={index === selected ? "green" : "gray"}
+              color={option === selected ? "green" : "gray"}
             />
             <Text style={styles.option}>{option}</Text>
           </Pressable>
