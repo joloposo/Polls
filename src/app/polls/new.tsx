@@ -1,16 +1,50 @@
-import { Stack } from "expo-router";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Redirect, Stack, router } from "expo-router";
+import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 import { useState } from "react";
 import { Feather } from "@expo/vector-icons";
+import { useAuth } from "../../providers/AuthProvider";
+import { supabase } from "../../lib/supabase";
 
 export default function NewPoll() {
   const [question, setQuestion] = useState<string>("");
   const [options, setOptions] = useState<string[]>(["", ""]);
+  const { user } = useAuth();
+  const [error, setError] = useState<string>("");
 
-  const createPoll = () => {
-    console.warn("Create poll", question, options);
+  const createPoll = async () => {
+    setError("");
+
+    if (!question) {
+      setError("Question is required");
+      return;
+    }
+
+    const validOptions = options.filter((option) => !!option.trim());
+    if (validOptions.length < 2) {
+      setError("At least two options are required");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("polls")
+      .insert([{ question, options: validOptions }])
+      .select();
+
+    if (error) {
+      Alert.alert("Failed to create poll");
+      console.error(error);
+      return;
+    }
+
+    router.back();
+
+    console.warn("Create poll", question, validOptions);
   };
-  
+
+  if (!user) {
+    return <Redirect href="/login" />;
+  }
+
   return (
     <>
       <Stack.Screen options={{ title: "Create poll" }} />
@@ -21,6 +55,7 @@ export default function NewPoll() {
           onChangeText={setQuestion}
           style={styles.input}
           placeholder="Add title"
+          autoCorrect={false}
         />
 
         <Text style={styles.title}>Options</Text>
@@ -35,6 +70,7 @@ export default function NewPoll() {
               }}
               style={styles.input}
               placeholder={`Option ${index + 1}`}
+              autoCorrect={false}
             />
             <Feather
               name="x"
@@ -56,10 +92,8 @@ export default function NewPoll() {
             setOptions([...options, ""]);
           }}
         />
-        <Button
-          title="Create Poll"
-          onPress={createPoll}
-        />
+        <Button title="Create Poll" onPress={createPoll} />
+        <Text style={{ color: "crimson" }}>{error}</Text>
       </View>
     </>
   );
