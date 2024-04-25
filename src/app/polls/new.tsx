@@ -21,9 +21,8 @@ export default function NewPoll() {
 
         <Text style={styles.title}>Options</Text>
         {options.map((option, index) => (
-          <View style={{ justifyContent: "center" }}>
+          <View style={{ justifyContent: "center" }} key={index}>
             <TextInput
-              key={index}
               value={option}
               onChangeText={(text) => {
                 const newOptions = [...options];
@@ -36,7 +35,7 @@ export default function NewPoll() {
             <Feather
               name="x"
               size={18}
-              color="black"
+              color="gray"
               style={{ position: "absolute", right: 10 }}
               onPress={() => {
                 const newOptions = [...options];
@@ -53,9 +52,12 @@ export default function NewPoll() {
             setOptions([...options, ""]);
           }}
         />
-        <Button title="Create Poll" onPress={() => {
+        <Button
+          title="Create Poll"
+          onPress={() => {
             console.warn("Create poll", question, options);
-        }} />
+          }}
+        />
       </View>
     </>
   );
@@ -67,12 +69,12 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "500",
     marginTop: 10,
   },
   input: {
-    fontSize: 16,
+    fontSize: 14,
     backgroundColor: "white",
     borderRadius: 5,
     padding: 10,

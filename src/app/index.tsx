@@ -1,22 +1,42 @@
 import { StatusBar } from "expo-status-bar";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Stack, Link } from "expo-router";
-import { Feather } from '@expo/vector-icons';
-
-const polls = [
-  { id: 1, title: "Volby za lepsie SK" },
-  { id: 2, title: "Volby za lepsie CZ" },
-  { id: 3, title: "Volby za lepsie PL" },
-  { id: 4, title: "Volby za lepsie HU" },
-];
+import { Feather } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 export default function HomeScreen() {
+  const [polls, setPolls] = useState([]);
+
+  useEffect(() => {
+    const fetchPolls = async () => {
+      console.log("Fetching polls...");
+
+      let { data, error } = await supabase.from("polls").select("*");
+
+      if(error){
+        Alert.alert("Error", error.message);
+      }
+
+      console.log("Fetched polls:", data);
+      setPolls(data);
+    };
+
+    fetchPolls();
+  }, []);
+
   return (
     <>
-      <Stack.Screen options={{ title: "Polls", headerRight: () => 
-      <Link href="polls/new">
-        <Feather name="plus" size={20} color='black' />
-      </Link> }} />
+      <Stack.Screen
+        options={{
+          title: "Polls",
+          headerRight: () => (
+            <Link href="polls/new">
+              <Feather name="plus" size={20} color="black" />
+            </Link>
+          ),
+        }}
+      />
       <FlatList
         data={polls}
         contentContainerStyle={styles.container}
@@ -24,7 +44,7 @@ export default function HomeScreen() {
           <Link href={`polls/${item.id}`} asChild>
             <Pressable style={styles.pollContainer}>
               <Text style={styles.pollTitle}>
-                {item.id}: {item.title}
+                {item.id}: {item.question}
               </Text>
             </Pressable>
           </Link>
