@@ -4,9 +4,10 @@ import { Stack, Link } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { Poll } from "../types/db";
 
 export default function HomeScreen() {
-  const [polls, setPolls] = useState([]);
+  const [polls, setPolls] = useState<Poll[]>([]);
 
   useEffect(() => {
     const fetchPolls = async () => {
