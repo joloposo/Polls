@@ -10,15 +10,12 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const fetchPolls = async () => {
-      console.log("Fetching polls...");
-
       let { data, error } = await supabase.from("polls").select("*");
 
       if(error){
         Alert.alert("Error", error.message);
       }
 
-      console.log("Fetched polls:", data);
       setPolls(data);
     };
 
@@ -33,6 +30,11 @@ export default function HomeScreen() {
           headerRight: () => (
             <Link href="polls/new">
               <Feather name="plus" size={20} color="black" />
+            </Link>
+          ),
+          headerLeft: () => (
+            <Link href="profile">
+              <Feather name="user" size={20} color="black" />
             </Link>
           ),
         }}

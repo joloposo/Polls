@@ -7,6 +7,10 @@ export default function NewPoll() {
   const [question, setQuestion] = useState<string>("");
   const [options, setOptions] = useState<string[]>(["", ""]);
 
+  const createPoll = () => {
+    console.warn("Create poll", question, options);
+  };
+  
   return (
     <>
       <Stack.Screen options={{ title: "Create poll" }} />
@@ -54,9 +58,7 @@ export default function NewPoll() {
         />
         <Button
           title="Create Poll"
-          onPress={() => {
-            console.warn("Create poll", question, options);
-          }}
+          onPress={createPoll}
         />
       </View>
     </>
