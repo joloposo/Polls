@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Stack, Link } from "expo-router";
+import { Feather } from '@expo/vector-icons';
 
 const polls = [
   { id: 1, title: "Volby za lepsie SK" },
@@ -12,7 +13,10 @@ const polls = [
 export default function HomeScreen() {
   return (
     <>
-      <Stack.Screen options={{ title: "Polls" }} />
+      <Stack.Screen options={{ title: "Polls", headerRight: () => 
+      <Link href="polls/new">
+        <Feather name="plus" size={20} color='black' />
+      </Link> }} />
       <FlatList
         data={polls}
         contentContainerStyle={styles.container}
