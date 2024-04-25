@@ -1,19 +1,28 @@
 import { StatusBar } from "expo-status-bar";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Stack, Link } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { Poll } from "../types/db";
+import { useAuth } from "../providers/AuthProvider";
 
 export default function HomeScreen() {
   const [polls, setPolls] = useState<Poll[]>([]);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchPolls = async () => {
       let { data, error } = await supabase.from("polls").select("*");
 
-      if(error){
+      if (error) {
         Alert.alert("Error", error.message);
       }
 
@@ -28,11 +37,12 @@ export default function HomeScreen() {
       <Stack.Screen
         options={{
           title: "Polls",
-          headerRight: () => (
-            <Link href="polls/new">
-              <Feather name="plus" size={20} color="black" />
-            </Link>
-          ),
+          headerRight: () =>
+            isAuthenticated ? (
+              <Link href="polls/new">
+                <Feather name="plus" size={20} color="black" />
+              </Link>
+            ) : null,
           headerLeft: () => (
             <Link href="profile">
               <Feather name="user" size={20} color="black" />
